@@ -577,6 +577,10 @@ class BaseDatabaseSchemaEditor:
         if sql:
             self.execute(sql)
 
+    def alter_constraint(self, model, constraint):
+        """Alter a constraint in a model."""
+        pass
+
     def alter_unique_together(self, model, old_unique_together, new_unique_together):
         """
         Deal with a model changing its unique_together. The input

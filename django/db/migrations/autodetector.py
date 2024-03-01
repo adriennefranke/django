@@ -1461,7 +1461,7 @@ class MigrationAutodetector:
             new_constraints = new_model_state.options[option_name]
             add_constraints = [c for c in new_constraints if c not in old_constraints]
             rem_constraints = [c for c in old_constraints if c not in new_constraints]
-            noop_constraints = []  # These are constraints that shouldn't be altered
+            noop_constraints = []  # These are constraints that shouldn't have any SQL
 
             self.altered_constraints.update(
                 {
@@ -1473,13 +1473,17 @@ class MigrationAutodetector:
                 }
             )
 
-        for constraint in self.altered_constraints["noop_constraints"]:
-            self.add_operation(
-                app_label,
-                operations.AlterConstraint(
-                    model_name=model_name, constraint=constraint
-                ),
-            )
+        for (
+            app_label,
+            model_name,
+        ), alt_constraints in self.altered_constraints.items():
+            for constraint in alt_constraints["noop_constraints"]:
+                self.add_operation(
+                    app_label,
+                    operations.AlterConstraint(
+                        model_name=model_name, constraint=constraint
+                    ),
+                )
 
     def create_altered_constraints_old(self):
         option_name = operations.AddConstraint.option_name

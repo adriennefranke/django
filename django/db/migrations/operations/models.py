@@ -1266,30 +1266,32 @@ class AlterConstraint(IndexOperation):
         )
 
     def state_forwards(self, app_label, state):
-        pass
+        state.alter_constraint(app_label, self.model_name_lower, self.constraint)
 
     def database_forwards(self, app_label, scheema_editor, from_state, to_state):
+        """Applies changes to the database schema when migrating forward"""
         pass
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        """Applies changes to the database schema when migrating backwards"""
         pass
 
     def describe(self):
         """
-        This describe this class's operation
+        Describes this class's operation
         """
         return "Alter constraint %s from model %s" % (self.name, self.model_name)
 
     @property
     def migration_name_fragment(self):
         """
-        This is the name of the migration file
+        Name of the migration file
         """
         return "alter_%s_%s" % (self.model_name_lower, self.name_lower)
 
     def reduce(self, operation, app_label):
         """
-        This method is used to "reduce" a series of migration operations by eliminating redundant or unnecessary ones
+        Reduces a series of migration operations by eliminating redundant or unnecessary ones
         """
         if (
             isinstance(operation, AlterConstraint)
