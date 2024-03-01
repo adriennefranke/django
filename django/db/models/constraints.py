@@ -1,4 +1,3 @@
-import copy
 import warnings
 from enum import Enum
 from types import NoneType

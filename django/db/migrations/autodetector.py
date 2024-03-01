@@ -1449,6 +1449,39 @@ class MigrationAutodetector:
                 )
 
     def create_altered_constraints(self):
+        option_name = operations.AlterConstraint.option_name
+        for app_label, model_name in sorted(self.kept_model_keys):
+            old_model_name = self.renamed_models.get(
+                (app_label, model_name), model_name
+            )
+            old_model_state = self.from_state.models[app_label, old_model_name]
+            new_model_state = self.to_state.models[app_label, model_name]
+
+            old_constraints = old_model_state.options[option_name]
+            new_constraints = new_model_state.options[option_name]
+            add_constraints = [c for c in new_constraints if c not in old_constraints]
+            rem_constraints = [c for c in old_constraints if c not in new_constraints]
+            noop_constraints = []  # These are constraints that shouldn't be altered
+
+            self.altered_constraints.update(
+                {
+                    (app_label, model_name): {
+                        "added_constraints": add_constraints,
+                        "removed_constraints": rem_constraints,
+                        "noop_constraints": noop_constraints,
+                    }
+                }
+            )
+
+        for constraint in self.altered_constraints["noop_constraints"]:
+            self.add_operation(
+                app_label,
+                operations.AlterConstraint(
+                    model_name=model_name, constraint=constraint
+                ),
+            )
+
+    def create_altered_constraints_old(self):
         option_name = operations.AddConstraint.option_name
         for app_label, model_name in sorted(self.kept_model_keys):
             old_model_name = self.renamed_models.get(

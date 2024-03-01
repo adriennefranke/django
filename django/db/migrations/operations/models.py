@@ -1253,6 +1253,9 @@ class AlterConstraint(IndexOperation):
         self.constraint = constraint
 
     def deconstruct(self):
+        """
+        Provides a representation of an AlterConstraint migration operation
+        """
         return (
             self.__class__.__name__,
             [],
@@ -1272,11 +1275,26 @@ class AlterConstraint(IndexOperation):
         pass
 
     def describe(self):
+        """
+        This describe this class's operation
+        """
         return "Alter constraint %s from model %s" % (self.name, self.model_name)
 
     @property
     def migration_name_fragment(self):
+        """
+        This is the name of the migration file
+        """
         return "alter_%s_%s" % (self.model_name_lower, self.name_lower)
 
     def reduce(self, operation, app_label):
-        pass
+        """
+        This method is used to "reduce" a series of migration operations by eliminating redundant or unnecessary ones
+        """
+        if (
+            isinstance(operation, AlterConstraint)
+            and self.model_name_lower == operation.model_name_lower
+            and self.constraint.name == operation.name
+        ):
+            return []
+        return super().reduce(operation, app_label)
